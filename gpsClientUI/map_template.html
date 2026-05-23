@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <style>
+        html, body, #map { height: 100%; margin: 0; }
+    </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+    var map = L.map('map').setView([44.43, 26.10], 13);
+
+    L.tileLayer('https://tile.openstreetmap.de/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+
+    var routes = ROUTES_DATA;
+
+    routes.forEach(session => {
+        var latlngs = [];
+        var osrmCoords = [];
+
+        session.forEach(point => {
+            latlngs.push([point.latitude, point.longitude]);
+            osrmCoords.push(point.longitude + "," + point.latitude);
+        });
+
+        if (latlngs.length > 0) {
+            latlngs.forEach(p => {
+                L.circleMarker(p, { radius: 4, color: '#e74c3c', fillOpacity: 1, weight: 1 }).addTo(map);
+            });
+
+            if (latlngs.length > 1) {
+                let chunkSize = 50;
+                for (let i = 0; i < osrmCoords.length - 1; i += (chunkSize - 1)) {
+                    let chunk = osrmCoords.slice(i, i + chunkSize);
+                    let coordsString = chunk.join(';');
+
+                    let osrmUrl = `https://router.project-osrm.org/route/v1/driving/${coordsString}?overview=full&geometries=geojson`;
+
+                    fetch(osrmUrl)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.routes && data.routes.length > 0) {
+                                var routeGeoJSON = data.routes[0].geometry;
+                                var routeLayer = L.geoJSON(routeGeoJSON, {
+                                    style: { color: '#2980b9', weight: 5, opacity: 0.8 }
+                                }).addTo(map);
+                                map.fitBounds(routeLayer.getBounds());
+                            } else {
+                                var polyline = L.polyline(latlngs.slice(i, i + chunkSize), {color: 'red', dashArray: '5, 10'}).addTo(map);
+                                map.fitBounds(polyline.getBounds());
+                            }
+                        })
+                        .catch(err => {
+                            console.error("OSRM Routing API Error", err);
+                            var polyline = L.polyline(latlngs, {color: 'red'}).addTo(map);
+                            map.fitBounds(polyline.getBounds());
+                        });
+                }
+            } else {
+                map.setView(latlngs[0], 16);
+            }
+        }
+    });
+</script>
+
+</body>
+</html>

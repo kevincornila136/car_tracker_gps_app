@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Poziție Istorică - 15:06</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <style>
+        html, body, #map { height: 100%; margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .popup-content { font-size: 14px; line-height: 1.5; }
+        .popup-title { font-weight: bold; color: #288cf0; border-bottom: 1px solid #e0e0e0; padding-bottom: 5px; margin-bottom: 8px; }
+    </style>
+</head>
+<body>
+<div id="map"></div>
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+    var map = L.map('map').setView([44.610070, 26.013197], 16);
+
+    // Folosim serverele openstreetmap.de (la fel ca in template-ul principal) pentru a evita blocarea pe fisiere locale
+    L.tileLayer('https://tile.openstreetmap.de/{z}/{x}/{y}.png', {
+        maxZoom: 19,
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    var popupHtml = '<div class="popup-content">' +
+                    '<div class="popup-title">🚗 Punct GPS identificat</div>' +
+                    '<b>Ora căutată:</b> 15:06<br>' +
+                    '<b>Coordonate:</b> 44.610070, 26.013197<br>' +
+                    '<b>Viteză:</b> 8.8 km/h<br>' +
+                    '<b>Sesiune ID:</b> 1' +
+                    '</div>';
+
+    L.marker([44.610070, 26.013197])
+        .addTo(map)
+        .bindPopup(popupHtml)
+        .openPopup();
+</script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+    <style>
+        html, body, #map { height: 100%; margin: 0; }
+    </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+<script>
+    var map = L.map('map').setView([44.43, 26.10], 13);
+
+    L.tileLayer('https://tile.openstreetmap.de/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+
+    var routes = [[{"latitude":44.604310,"longitude":26.018606},{"latitude":44.604279,"longitude":26.018671},{"latitude":44.604542,"longitude":26.018568},{"latitude":44.604507,"longitude":26.018603},{"latitude":44.605053,"longitude":26.018371},{"latitude":44.605768,"longitude":26.017856},{"latitude":44.605719,"longitude":26.016931},{"latitude":44.604377,"longitude":26.014503},{"latitude":44.604447,"longitude":26.014370},{"latitude":44.604357,"longitude":26.014451},{"latitude":44.604652,"longitude":26.014485},{"latitude":44.608173,"longitude":26.012922},{"latitude":44.609948,"longitude":26.013182},{"latitude":44.610070,"longitude":26.013197},{"latitude":44.610093,"longitude":26.013270},{"latitude":44.614308,"longitude":26.013284},{"latitude":44.614741,"longitude":26.014292},{"latitude":44.610902,"longitude":26.013607},{"latitude":44.616578,"longitude":26.014013},{"latitude":44.618623,"longitude":26.011823},{"latitude":44.619840,"longitude":26.011090},{"latitude":44.619452,"longitude":26.011997},{"latitude":44.620453,"longitude":26.012985},{"latitude":44.620844,"longitude":26.017343},{"latitude":44.620728,"longitude":26.017125},{"latitude":44.620728,"longitude":26.015840},{"latitude":44.620718,"longitude":26.016157},{"latitude":44.620723,"longitude":26.016228}]];
+
+    routes.forEach(session => {
+        var latlngs = [];
+        var osrmCoords = [];
+
+        session.forEach(point => {
+            latlngs.push([point.latitude, point.longitude]);
+
+            osrmCoords.push(point.longitude + "," + point.latitude);
+        });
+
+        if (latlngs.length > 0) {
+            // Desenam marker pentru fiecare punct raportat (punctele brute)
+            latlngs.forEach(p => {
+                L.circleMarker(p, { radius: 4, color: '#e74c3c', fillOpacity: 1, weight: 1 }).addTo(map);
+            });
+
+            if (latlngs.length > 1) {
+                let chunkSize = 50;
+                for (let i = 0; i < osrmCoords.length - 1; i += (chunkSize - 1)) {
+                    let chunk = osrmCoords.slice(i, i + chunkSize);
+                    let coordsString = chunk.join(';');
+
+                    let osrmUrl = `https://router.project-osrm.org/route/v1/driving/${coordsString}?overview=full&geometries=geojson`;
+
+                    fetch(osrmUrl)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.routes && data.routes.length > 0) {
+                                var routeGeoJSON = data.routes[0].geometry;
+                                var routeLayer = L.geoJSON(routeGeoJSON, {
+                                    style: { color: '#2980b9', weight: 5, opacity: 0.8 }
+                                }).addTo(map);
+                                map.fitBounds(routeLayer.getBounds());
+                            } else {
+                                var polyline = L.polyline(latlngs.slice(i, i + chunkSize), {color: 'red', dashArray: '5, 10'}).addTo(map);
+                                map.fitBounds(polyline.getBounds());
+                            }
+                        })
+                        .catch(err => {
+                            console.error("OSRM Routing API Error", err);
+                            var polyline = L.polyline(latlngs, {color: 'red'}).addTo(map);
+                            map.fitBounds(polyline.getBounds());
+                        });
+                }
+            } else {
+                map.setView(latlngs[0], 16);
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
