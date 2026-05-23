@@ -1,18 +1,18 @@
 # GPS Car Tracker
 
-Aplicație pentru localizarea și monitorizarea autoturismelor realizată utilizând Android, Java Spring Boot și MySQL.
+Application for vehicle localization and monitoring developed using Android, Java Spring Boot and MySQL.
 
-Sistemul colectează coordonatele GPS de pe telefonul Android, transmite datele prin HTTP către un server central și afișează traseul și statisticile într-o interfață desktop Java Swing folosind OpenStreetMap.
+The system collects GPS coordinates from the Android phone, sends the data through HTTP to a central server and displays the route and statistics in a Java Swing desktop interface using OpenStreetMap.
 
-Funcționalități principale:
-- transmitere automată a locației la intervale regulate
-- reconstituirea traseului pe hartă
-- afișarea poziției la un anumit timestamp
-- calcul distanță totală și viteză medie
-- separarea traseelor pe sesiuni de deplasare
-- comunicație securizată prin Tailscale VPN
+Main functionalities:
+- automatic location transmission at regular intervals
+- route reconstruction on the map
+- displaying the position at a specific timestamp
+- total distance and average speed calculation
+- separation of routes into driving sessions
+- secure communication through Tailscale VPN
 
-Tehnologii utilizate:
+Technologies used:
 - Android Studio / Java
 - Spring Boot REST API
 - MySQL + Hibernate + Spring Data
@@ -20,9 +20,9 @@ Tehnologii utilizate:
 - OpenStreetMap
 - Tailscale (WireGuard VPN)
 
-Pentru rulare:
-1. Se configurează baza de date MySQL și fișierul `application.properties`
-2. Se pornește serverul Spring Boot
-3. Se configurează IP-ul serverului în aplicația Android
-4. Se rulează aplicația Android și interfața desktop Java Swing
-5. Datele GPS vor fi transmise și afișate în timp real
+Running the project:
+1. Configure the MySQL database and the `application.properties` file
+2. Start the Spring Boot server
+3. Configure the server IP inside the Android application
+4. Run the Android application and the Java Swing desktop interface
+5. GPS data will be transmitted and displayed in real time
